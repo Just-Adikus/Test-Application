@@ -24,72 +24,99 @@ class CalendarPage extends StatelessWidget {
   }
 }
 
-class _CalendarView extends StatelessWidget {
+class _CalendarView extends StatefulWidget {
   const _CalendarView();
+
+  @override
+  State<_CalendarView> createState() => _CalendarViewState();
+}
+
+class _CalendarViewState extends State<_CalendarView> {
+  int index = 3;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
-      body: Stack(
-        children: [
-          SafeArea(
-            bottom: false,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                _AppBar(),
-                const SizedBox(height: 20),
-                _FilterBar(),
-                const SizedBox(height: 16),
-                const Expanded(child: _ItemsList()),
-              ],
-            ),
+      appBar: AppBar(
+        centerTitle: true,
+        title: Text(
+          "Календарь",
+          style: TextStyle(
+            fontSize: 22,
+            fontWeight: FontWeight.w800,
+            color: Color(0xFF1A1A2E),
           ),
-          const Positioned(
-            left: 0,
-            right: 0,
-            bottom: 0,
-            child: _FloatingBottomNav(),
-          ),
+        ),
+        leading: Icon(Icons.arrow_back, size: 26, color: Color(0xFF1A1A2E)),
+        backgroundColor: Colors.white,
+        actions: [
+          Icon(Icons.add, size: 26, color: Color(0xFF1A1A2E)),
+          SizedBox(width: 30),
         ],
+        scrolledUnderElevation: 0.0,
+      ),
+      backgroundColor: Colors.white,
+      extendBody: true,
+      body: SafeArea(
+        bottom: false,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // _AppBar(),
+            const SizedBox(height: 20),
+            _FilterBar(),
+            const SizedBox(height: 16),
+            const Expanded(child: _ItemsList()),
+          ],
+        ),
+      ),
+
+      // const Positioned(
+      //   left: 0,
+      //   right: 0,
+      //   bottom: 0,
+      //   child: _FloatingBottomNav(),
+      // ),
+      bottomNavigationBar: _FloatingBottomNav(
+        selectedIndex: index,
+        onDestinationSelected: (i) => setState(() => index = i),
       ),
     );
   }
 }
 
-class _AppBar extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(20, 18, 20, 0),
-      child: Row(
-        children: [
-          GestureDetector(
-            onTap: () => Navigator.of(context).maybePop(),
-            child: const Icon(
-              Icons.arrow_back_ios,
-              size: 22,
-              color: Color(0xFF1A1A2E),
-            ),
-          ),
-          const Expanded(
-            child: Text(
-              'Календарь',
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                fontSize: 22,
-                fontWeight: FontWeight.w800,
-                color: Color(0xFF1A1A2E),
-              ),
-            ),
-          ),
-          const Icon(Icons.add, size: 26, color: Color(0xFF1A1A2E)),
-        ],
-      ),
-    );
-  }
-}
+// class _AppBar extends StatelessWidget {
+//   @override
+//   Widget build(BuildContext context) {
+//     return Padding(
+//       padding: const EdgeInsets.fromLTRB(20, 18, 20, 0),
+//       child: Row(
+//         children: [
+//           GestureDetector(
+//             onTap: () => Navigator.of(context).maybePop(),
+//             child: const Icon(
+//               Icons.arrow_back_ios,
+//               size: 22,
+//               color: Color(0xFF1A1A2E),
+//             ),
+//           ),
+//           const Expanded(
+//             child: Text(
+//               'Календарь',
+//               textAlign: TextAlign.center,
+//               style: TextStyle(
+//                 fontSize: 22,
+//                 fontWeight: FontWeight.w800,
+//                 color: Color(0xFF1A1A2E),
+//               ),
+//             ),
+//           ),
+//           const Icon(Icons.add, size: 26, color: Color(0xFF1A1A2E)),
+//         ],
+//       ),
+//     );
+//   }
+// }
 
 class _FilterBar extends StatelessWidget {
   @override
@@ -203,36 +230,60 @@ class _ItemsList extends StatelessWidget {
 }
 
 class _FloatingBottomNav extends StatelessWidget {
-  const _FloatingBottomNav();
+  final int selectedIndex;
+  final ValueChanged<int> onDestinationSelected;
+
+  const _FloatingBottomNav({
+    required this.selectedIndex,
+    required this.onDestinationSelected,
+  });
 
   @override
   Widget build(BuildContext context) {
     return SafeArea(
       child: Padding(
-        padding: const EdgeInsets.only(left: 16.0, right: 16.0, bottom: 16.0),
+        padding: const EdgeInsets.only(left: 20, right: 20, bottom: 10),
         child: ClipRRect(
-          borderRadius: BorderRadius.circular(24.0),
-          child: BackdropFilter(
-            filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
-            child: Container(
+          borderRadius: BorderRadius.circular(24),
+          child: NavigationBarTheme(
+            data: NavigationBarThemeData(
+              backgroundColor: Color(0xFF828282),
+              indicatorColor: Colors.transparent,
               height: 72,
-              decoration: BoxDecoration(
-                color: const Color(0xFF828282),
-                borderRadius: BorderRadius.circular(24.0),
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                children: const [
-                  _NavIcon(icon: Icons.home_outlined, isActive: false),
-                  _NavIcon(
-                    icon: Icons.insert_drive_file_outlined,
-                    isActive: false,
-                  ),
-                  _NavIcon(icon: Icons.group_outlined, isActive: false),
-                  _NavIcon(icon: Icons.alarm, isActive: true),
-                  _NavIcon(icon: Icons.person_outline, isActive: false),
-                ],
-              ),
+              labelBehavior: NavigationDestinationLabelBehavior.alwaysHide,
+              iconTheme: WidgetStateProperty.resolveWith((states) {
+                final isSelected = states.contains(WidgetState.selected);
+                return IconThemeData(
+                  size: 28,
+                  color: isSelected ? Color(0xFF00BCD4) : Colors.white,
+                );
+              }),
+            ),
+            child: NavigationBar(
+              selectedIndex: selectedIndex,
+              onDestinationSelected: onDestinationSelected,
+              destinations: [
+                NavigationDestination(
+                  icon: Icon(Icons.home_outlined),
+                  label: 'Главная',
+                ),
+                NavigationDestination(
+                  icon: Icon(Icons.insert_drive_file_outlined),
+                  label: 'Документы',
+                ),
+                NavigationDestination(
+                  icon: Icon(Icons.group_outlined),
+                  label: 'Команда',
+                ),
+                NavigationDestination(
+                  icon: Icon(Icons.alarm),
+                  label: 'Календарь',
+                ),
+                NavigationDestination(
+                  icon: Icon(Icons.person_outline),
+                  label: 'Профиль',
+                ),
+              ],
             ),
           ),
         ),
@@ -241,16 +292,16 @@ class _FloatingBottomNav extends StatelessWidget {
   }
 }
 
-class _NavIcon extends StatelessWidget {
-  final IconData icon;
-  final bool isActive;
+// class _NavIcon extends StatelessWidget {
+//   final IconData icon;
+//   final bool isActive;
 
-  const _NavIcon({required this.icon, required this.isActive});
+//   const _NavIcon({required this.icon, required this.isActive});
 
-  @override
-  Widget build(BuildContext context) {
-    final color =
-        isActive ? const Color(0xFF00BCD4) : Colors.white.withOpacity(0.85);
-    return Icon(icon, size: 28, color: color);
-  }
-}
+//   @override
+//   Widget build(BuildContext context) {
+//     final color =
+//         isActive ? const Color(0xFF00BCD4) : Colors.white.withOpacity(0.85);
+//     return Icon(icon, size: 28, color: color);
+//   }
+// }
